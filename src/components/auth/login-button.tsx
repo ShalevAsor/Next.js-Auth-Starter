@@ -16,6 +16,7 @@ export const LoginButton = ({
     router.push("/auth/login");
   };
   if (mode === "modal") {
+    console.log(asChild);
     return <span>TODO: implement modal</span>;
   }
   return (
