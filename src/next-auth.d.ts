@@ -1,4 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import NextAuth, { type DefaultSession } from "next-auth";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { JWT } from "next-auth/jwt";
 import { UserRole } from "@prisma/client";
 export type ExtendedUser = DefaultSession["user"] & {
