@@ -1,5 +1,5 @@
 /**
- * An array of routes that are public and do not require authentication
+ * An array of routes that are public and do not require authentication.
  * @type {string[]}
  */
 export const publicRoutes = ["/", "/auth/new-verification"];
