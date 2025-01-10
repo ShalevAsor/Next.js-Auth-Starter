@@ -11,6 +11,7 @@ A production-ready authentication starter built with Next.js 14, featuring advan
   - Two-factor authentication (2FA)
   - Email verification
   - Password reset functionality
+  - Rate limiting
   - Session management
   - Role-based access control (RBAC)
 
@@ -18,7 +19,10 @@ A production-ready authentication starter built with Next.js 14, featuring advan
 
   - JWT-based sessions
   - CSRF protection
-  - Rate limiting
+  - Advanced Rate Limiting
+  - IP and Email-based protection
+  - Sliding window algorithm
+  - Real-time countdown feedback
   - Secure password hashing
   - XSS protection
   - HTTP-only cookies
@@ -37,6 +41,7 @@ A production-ready authentication starter built with Next.js 14, featuring advan
 
 - Node.js 18.17 or later
 - PostgreSQL database
+- Redis database (for rate limiting)
 - npm or yarn
 - Git
 
@@ -72,6 +77,9 @@ A production-ready authentication starter built with Next.js 14, featuring advan
      - `GOOGLE_CLIENT_ID`
      - `GOOGLE_CLIENT_SECRET`
    - `RESEND_API_KEY`: For email functionality
+   - Rate Limiting (Required):
+   - `UPSTASH_REDIS_URL`: Your Upstash Redis REST URL
+   - `UPSTASH_REDIS_TOKEN`: Your Upstash Redis REST Token
 
 4. Initialize the database:
 
@@ -143,14 +151,7 @@ Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md)
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Next.js team for the amazing framework
-- Prisma team for the excellent ORM
-- Auth.js team for the authentication foundation
-- Shadcn for the beautiful UI components
+This project is licensed under the MIT License
 
 ## TODO:
 

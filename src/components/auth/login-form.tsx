@@ -20,6 +20,8 @@ import { FormSuccess } from "@/components/form-success";
 import { login } from "@/actions/login";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { RateLimitCountdown } from "./rate-limit-countdown";
+
 export const LoginForm = () => {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
@@ -32,6 +34,7 @@ export const LoginForm = () => {
   const [showTwoFactor, setShowTwoFactor] = useState(false);
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
+  const [rateLimitSeconds, setRateLimitSeconds] = useState<number | null>(null);
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
@@ -47,8 +50,15 @@ export const LoginForm = () => {
     startTransition(() => {
       login(values, callbackUrl).then((response) => {
         if (response?.error) {
-          form.reset();
-          setError(response.error);
+          if (response.error.includes("Too many login attempts")) {
+            const seconds = parseInt(
+              response.error.match(/(\d+) seconds/)?.[1] || "0"
+            );
+            setRateLimitSeconds(seconds);
+          } else {
+            form.reset();
+            setError(response.error);
+          }
         }
         if (response?.success) {
           form.reset();
@@ -59,6 +69,10 @@ export const LoginForm = () => {
         }
       });
     });
+  };
+  const handleRateLimitComplete = () => {
+    setRateLimitSeconds(null);
+    setError(undefined);
   };
   return (
     <CardWrapper
@@ -82,7 +96,7 @@ export const LoginForm = () => {
                       <Input
                         {...field}
                         placeholder="123456"
-                        disabled={isPending}
+                        disabled={isPending || rateLimitSeconds !== null}
                       />
                     </FormControl>
                     <FormMessage />
@@ -103,7 +117,7 @@ export const LoginForm = () => {
                           {...field}
                           placeholder="name@email.com"
                           type="email"
-                          disabled={isPending}
+                          disabled={isPending || rateLimitSeconds !== null}
                         />
                       </FormControl>
                       <FormMessage />
@@ -121,7 +135,7 @@ export const LoginForm = () => {
                           {...field}
                           placeholder="******"
                           type="password"
-                          disabled={isPending}
+                          disabled={isPending || rateLimitSeconds !== null}
                         />
                       </FormControl>
                       <Button
@@ -139,10 +153,23 @@ export const LoginForm = () => {
               </>
             )}
           </div>
-          <FormError message={error || urlError} />
-          <FormSuccess message={success} />
+          {rateLimitSeconds ? (
+            <RateLimitCountdown
+              initialSeconds={rateLimitSeconds}
+              onComplete={handleRateLimitComplete}
+            />
+          ) : (
+            <>
+              <FormError message={error || urlError} />
+              <FormSuccess message={success} />
+            </>
+          )}
 
-          <Button type="submit" className="w-full" disabled={isPending}>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isPending || rateLimitSeconds !== null}
+          >
             {showTwoFactor ? "Confirm" : "Login"}
           </Button>
         </form>

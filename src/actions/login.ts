@@ -14,10 +14,16 @@ import {
 } from "@/lib/tokens";
 import { sendVerificationEmail, sendTwoFactorTokenEmail } from "@/lib/mail";
 import { getTwoFactorConfirmationByUserId } from "@/data/two-factor-confirmation";
+import { checkLoginRateLimit } from "@/lib/rate-limit";
+import { headers } from "next/headers";
+
 export const login = async (
   values: z.infer<typeof LoginSchema>,
   callbackUrl?: string | null
 ) => {
+  // Get IP for rate limiting
+  const headersList = await headers();
+  const ip = headersList.get("x-forwarded-for") || "unknown";
   //validate fields
   const validatedFields = LoginSchema.safeParse(values);
 
@@ -26,6 +32,16 @@ export const login = async (
   }
   const { email, password, code } = validatedFields.data;
 
+  try {
+    // Check rate limit before proceeding with login
+    const identifier = `${ip}:${email}`;
+    await checkLoginRateLimit(identifier);
+  } catch (rateLimitError) {
+    // If rate limit is exceeded, return the error message
+    if (rateLimitError instanceof Error) {
+      return { error: rateLimitError.message };
+    }
+  }
   // check if user is exist
   const existingUser = await getUserByEmail(email);
   if (!existingUser) {
