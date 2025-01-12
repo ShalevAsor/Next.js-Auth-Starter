@@ -1,3 +1,16 @@
+/**
+ * Password Reset Request Form
+ *
+ * This component handles the initial step of the password reset flow where users
+ * request a reset link to be sent to their email. It includes validation,
+ * error handling, and integration with the server-side reset action.
+ *
+ * Security Features:
+ * - Email validation
+ * - Rate limiting (through server action)
+ * - Loading state management
+ * - Success/Error feedback
+ */
 "use client";
 import { useTransition, useState } from "react";
 import { CardWrapper } from "@/components/auth/card-wrapper";
@@ -17,18 +30,36 @@ import {
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
-import { reset } from "@/actions/reset";
+import { reset } from "@/actions/auth/reset";
 export const ResetForm = () => {
+  /**
+   * State Management:
+   * - isPending: Tracks loading state during form submission
+   * - error: Stores error messages from the server
+   * - success: Stores success messages from the server
+   */
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
+
+  /**
+   * Form initialization with Zod schema validation
+   * ResetSchema typically validates email format and presence
+   */
   const form = useForm<z.infer<typeof ResetSchema>>({
     resolver: zodResolver(ResetSchema),
     defaultValues: {
       email: "",
     },
   });
-
+  /**
+   * Handles form submission
+   * 1. Clears previous error/success states
+   * 2. Initiates password reset process
+   * 3. Handles response feedback
+   *
+   * @param values - Form values containing email
+   */
   const onSubmit = (values: z.infer<typeof ResetSchema>) => {
     //clear error and success messages
     setError("");

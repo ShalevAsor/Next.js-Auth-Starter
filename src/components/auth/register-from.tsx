@@ -1,3 +1,18 @@
+/**
+ * User Registration Form Component
+ *
+ * Handles new user registration with comprehensive validation, security measures,
+ * and user feedback. This component integrates with server-side actions for
+ * secure user creation and supports both traditional and social authentication.
+ *
+ * Features:
+ * - Email and password validation
+ * - Name validation
+ * - Loading state management
+ * - Error/Success feedback
+ * - Social authentication options
+ * - Accessibility considerations
+ */
 "use client";
 import { useTransition, useState } from "react";
 import { CardWrapper } from "@/components/auth/card-wrapper";
@@ -13,11 +28,19 @@ import {
   FormField,
   FormItem,
   FormMessage,
-} from "../ui/form";
+} from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
-import { register } from "@/actions/register";
+import { register } from "@/actions/auth/register";
+import { Loader } from "lucide-react";
+
+/**
+ * State Management
+ * Using useTransition for better loading state coordination during registration
+ * and separate states for error and success messages
+ */
+
 export const RegisterForm = () => {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | undefined>("");
@@ -111,7 +134,14 @@ export const RegisterForm = () => {
           <FormSuccess message={success} />
 
           <Button type="submit" className="w-full" disabled={isPending}>
-            Register
+            {isPending ? (
+              <div className="flex items-center justify-center gap-x-2">
+                <Loader className="animate-spin" />
+                <span className="text-sm">Creating account...</span>
+              </div>
+            ) : (
+              "Register"
+            )}
           </Button>
         </form>
       </Form>

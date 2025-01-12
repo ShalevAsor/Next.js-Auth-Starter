@@ -78,8 +78,8 @@ A production-ready authentication starter built with Next.js 14, featuring advan
      - `GOOGLE_CLIENT_SECRET`
    - `RESEND_API_KEY`: For email functionality
    - Rate Limiting (Required):
-   - `UPSTASH_REDIS_URL`: Your Upstash Redis REST URL
-   - `UPSTASH_REDIS_TOKEN`: Your Upstash Redis REST Token
+     - `UPSTASH_REDIS_URL`: Your Upstash Redis REST URL
+     - `UPSTASH_REDIS_TOKEN`: Your Upstash Redis REST Token
 
 4. Initialize the database:
 

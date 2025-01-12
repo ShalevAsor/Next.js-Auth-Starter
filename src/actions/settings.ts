@@ -1,3 +1,9 @@
+/**
+ * User Settings Server Action
+ * Handles updates to user settings including profile information,
+ * email changes, and password updates. Includes special handling
+ * for OAuth users and email verification.
+ */
 "use server";
 
 import * as z from "zod";
@@ -8,7 +14,15 @@ import { currentUser } from "@/lib/auth";
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
 import bcrypt from "bcryptjs";
+/**
+ * Updates user settings with comprehensive validation and security checks.
+ * Handles different update scenarios including email changes and password updates.
+ *
+ * @param values - Object containing the settings to update
+ * @returns Object containing success or error message
+ */
 export const settings = async (values: z.infer<typeof SettingsSchema>) => {
+  // user Authentication
   const user = await currentUser();
   if (!user || !user.id) return { error: "Unauthorized" };
   const dbUser = await getUserById(user.id);
@@ -42,7 +56,7 @@ export const settings = async (values: z.infer<typeof SettingsSchema>) => {
     });
     return { success: "Verification email sent!" };
   }
-
+  // password change handling
   if (values.password && values.newPassword && dbUser.password) {
     const passwordsMatch = await bcrypt.compare(
       values.password,
@@ -56,6 +70,7 @@ export const settings = async (values: z.infer<typeof SettingsSchema>) => {
     values.newPassword = undefined;
   }
 
+  //update user settings
   await db.user.update({
     where: { id: dbUser.id },
     data: {

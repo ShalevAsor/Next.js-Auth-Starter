@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { UserRole } from "@prisma/client";
 import { toast } from "sonner";
-import { admin } from "@/actions/admin";
+import { admin } from "@/actions/auth/admin";
 const AdminPage = () => {
   const onServerActionClick = () => {
     admin().then((data) => {

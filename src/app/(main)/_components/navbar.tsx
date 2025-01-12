@@ -30,7 +30,7 @@ export const Navbar = () => {
           <Link href="/settings">Settings</Link>
         </Button>
       </div>
-      <UserButton />
+      <UserButton useModal />
     </nav>
   );
 };

@@ -8,9 +8,6 @@ import { db } from "@/lib/db";
 
 /**
  * Retrieves a password reset token from the database by its token value
- *
- * @param {string} token - The password reset token string to search for
- * @returns {Promise<PasswordResetToken | null>} The verification token record if found, null otherwise
  */
 export const getPasswordResetTokenByToken = async (token: string) => {
   try {
@@ -25,11 +22,6 @@ export const getPasswordResetTokenByToken = async (token: string) => {
 
 /**
  * Retrieves a password reset token from the database by email address
- *
- * @param {string} email - The email address associated with the password reset token
- * @returns {Promise<PasswordResetToken | null>} The first matching verification token record if found, null otherwise
- *
- *
  * @remarks
  * - This function returns the first matching token if multiple exist for the same email
  * - Returns null if no token is found or if an error occurs during the database query

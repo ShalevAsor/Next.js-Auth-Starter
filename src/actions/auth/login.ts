@@ -1,3 +1,13 @@
+/**
+ * Login Server Action
+ * Handles the complete login flow including:
+ * - Rate limiting
+ * - Input validation
+ * - Email verification
+ * - Two-factor authentication
+ * - OAuth compatibility checks
+ * - Credential verification
+ */
 "use server";
 import * as z from "zod";
 import bcrypt from "bcryptjs";
@@ -16,15 +26,23 @@ import { sendVerificationEmail, sendTwoFactorTokenEmail } from "@/lib/mail";
 import { getTwoFactorConfirmationByUserId } from "@/data/two-factor-confirmation";
 import { checkLoginRateLimit } from "@/lib/rate-limit";
 import { headers } from "next/headers";
-
+/**
+ * Handles user login with comprehensive security checks and multi-factor authentication
+ *
+ * @param values - Login form data (email, password, and optional 2FA code)
+ * @param callbackUrl - URL to redirect to after successful login
+ * @returns Object containing success/error message
+ */
 export const login = async (
   values: z.infer<typeof LoginSchema>,
   callbackUrl?: string | null
 ) => {
-  // Get IP for rate limiting
+  // Step 1: Rate Limiting
+  // Prevent brute force attacks by limiting login attempts per IP/email
   const headersList = await headers();
   const ip = headersList.get("x-forwarded-for") || "unknown";
-  //validate fields
+  // Step 2: Input Validation
+  // Ensure the submitted data matches our schema requirements
   const validatedFields = LoginSchema.safeParse(values);
 
   if (!validatedFields.success) {
@@ -33,7 +51,7 @@ export const login = async (
   const { email, password, code } = validatedFields.data;
 
   try {
-    // Check rate limit before proceeding with login
+    // Apply rate limiting using combined IP and email
     const identifier = `${ip}:${email}`;
     await checkLoginRateLimit(identifier);
   } catch (rateLimitError) {
@@ -42,19 +60,22 @@ export const login = async (
       return { error: rateLimitError.message };
     }
   }
-  // check if user is exist
+  // Step 3: User Existence Check
+  // Verify the user exists in our database
   const existingUser = await getUserByEmail(email);
   if (!existingUser) {
     return { error: "Invalid credentials" };
   }
-  // check if user should login with oauth
+  // Step 4: OAuth Compatibility Check
+  // Prevent password login for OAuth users
   if (!existingUser.email || !existingUser.password) {
     return {
       error:
         "This email is registered with a social login. Please sign in with your social account",
     };
   }
-  //check if the user verified his email
+  // Step 5: Email Verification Check
+  // Ensure email is verified before allowing login
   if (!existingUser.emailVerified) {
     const verificationToken = await generateVerificationToken(
       existingUser.email
@@ -66,17 +87,20 @@ export const login = async (
     return { success: "Confirmation email sent!" };
   }
 
-  //check if 2FA enabled
+  /// Step 6: Two-Factor Authentication Flow
   if (existingUser.isTwoFactorEnabled && existingUser.email) {
     if (code) {
+      // Verify the submitted 2FA code
       const twoFactorToken = await getTwoFactorTokenByEmail(existingUser.email);
       if (!twoFactorToken) return { error: "Invalid code!" };
       if (twoFactorToken.token !== code) return { error: "Invalid code!" };
       const hasExpired = new Date(twoFactorToken.expires) < new Date();
       if (hasExpired) return { error: "Code expired!" };
+      // Clean up used token
       await db.twoFactorToken.delete({
         where: { id: twoFactorToken.id },
       });
+      // Handle 2FA confirmation
       const existingConfirmation = await getTwoFactorConfirmationByUserId(
         existingUser.id
       );
@@ -85,6 +109,7 @@ export const login = async (
           where: { id: existingConfirmation.id },
         });
       }
+      // Create new confirmation
       await db.twoFactorConfirmation.create({
         data: {
           userId: existingUser.id,
@@ -99,11 +124,14 @@ export const login = async (
       if (!passwordsMatch) {
         return { error: "Invalid credentials!" };
       }
+      // Generate and send 2FA token
       const twoFactorToken = await generateTwoFactorToken(existingUser.email);
       await sendTwoFactorTokenEmail(existingUser.email, twoFactorToken.token);
       return { twoFactor: true };
     }
   }
+  // Step 7: Final Login Attempt
+  // All checks passed, attempt to sign in
   try {
     await signIn("credentials", {
       email,
