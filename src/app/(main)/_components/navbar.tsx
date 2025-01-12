@@ -1,3 +1,4 @@
+// example only!
 "use client";
 import { UserButton } from "@/components/auth/user-button";
 import { Button } from "@/components/ui/button";
@@ -30,7 +31,7 @@ export const Navbar = () => {
           <Link href="/settings">Settings</Link>
         </Button>
       </div>
-      <UserButton useModal />
+      <UserButton side="bottom" />
     </nav>
   );
 };
