@@ -147,13 +147,8 @@ A production-ready authentication starter built with Next.js 14, featuring advan
 
 ## Contributing
 
-Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+Contributions are welcome!
 
 ## License
 
 This project is licensed under the MIT License
-
-## TODO:
-
-- fix the user button - image not shown for google users
-- when click there is a square instead of circle
