@@ -2,6 +2,10 @@
 
 A production-ready authentication starter built with Next.js 14, featuring advanced security measures and comprehensive user management.
 
+## Demo
+
+Experience the authentication system in action: [Live Demo](https://pinit-nu.vercel.app)
+
 ## Features
 
 - 🔐 Advanced Authentication System
