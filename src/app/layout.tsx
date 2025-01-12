@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
+import { ModalProvider } from "@/components/providers/modal-provider";
+import { SessionProvider } from "next-auth/react";
+import { auth } from "@/auth";
+import { Navbar } from "./(main)/_components/navbar";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -17,20 +21,25 @@ export const metadata: Metadata = {
   description: "Shalev Asor Github",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div>
-          <Toaster />
-          {children}
-        </div>
+        <SessionProvider>
+          <div>
+            <ModalProvider />
+            <Toaster />
+            <Navbar />
+            {children}
+          </div>
+        </SessionProvider>
       </body>
     </html>
   );
