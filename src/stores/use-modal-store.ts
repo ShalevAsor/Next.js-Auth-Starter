@@ -3,7 +3,7 @@ import { create } from "zustand";
 export type ModalType = "settings";
 
 interface ModalData {
-  data?: Record<string, any>;
+  data?: Record<string, string | number>;
 }
 
 interface ModalStore {
