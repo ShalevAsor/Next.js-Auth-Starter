@@ -34,7 +34,7 @@ export default async function RootLayout({
           <div>
             <ModalProvider />
             <Toaster />
-            <Navbar />
+            {/* <Navbar /> */}
             {children}
           </div>
         </SessionProvider>
